@@ -47,6 +47,9 @@ _PEER_JSON_TO_LEGACY: tuple[tuple[str, str], ...] = (
     ("software_id", "SOFTWARE_ID"),
     ("colorcode", "COLORCODE"),
     ("tx_power", "TX_POWER"),
+    ("latitude", "LATITUDE"),
+    ("longitude", "LONGITUDE"),
+    ("height", "HEIGHT"),
 )
 
 _BYTE_PEER_FIELDS = frozenset({"RX_FREQ", "TX_FREQ", "SLOTS"})
