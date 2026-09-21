@@ -108,6 +108,25 @@ def test_dashboard_state_to_config_snd():
     assert float(peer["LONGITUDE"].decode()) == 0.0
 
 
+def test_dashboard_state_carries_reported_peer_coordinates():
+    """A peer that reports LATITUDE/LONGITUDE/HEIGHT in RPTC must reach the legacy
+    CONFIG pickle with the real values, not the "no position" 0.000000 default —
+    that default exists so legacy dash_db.py's float(LATITUDE) never raises, not
+    to mask coordinates that were actually reported."""
+    mapper = V2ToV1Mapper()
+    _seed_routing_masters(mapper, "MASTER-A")
+    doc = _sample_dashboard_state()
+    doc["ctable"]["MASTERS"]["MASTER-A"]["peers"][1001]["latitude"] = "-33.448912"
+    doc["ctable"]["MASTERS"]["MASTER-A"]["peers"][1001]["longitude"] = "-70.669266"
+    doc["ctable"]["MASTERS"]["MASTER-A"]["peers"][1001]["height"] = "12"
+    frames = mapper.translate(Opcode.STATE_SND, json.dumps(doc).encode())
+    config = pickle.loads(frames[0][1:])
+    peer = config["MASTER-A"]["PEERS"][(1001).to_bytes(4, "big")]
+    assert float(peer["LATITUDE"].decode()) == -33.448912
+    assert float(peer["LONGITUDE"].decode()) == -70.669266
+    assert peer["HEIGHT"] == "12"
+
+
 def test_dashboard_state_master_repeat_from_json():
     mapper = V2ToV1Mapper()
     _seed_routing_masters(mapper, "MASTER-A")
